@@ -24,8 +24,16 @@ import pytest  # noqa: E402
 def _bootstrap_database() -> Iterator[None]:
     """会话级初始化：建表 + 装载 Mock 数据，所有测试共享。"""
     from app.db.init_db import init_db
+    from app.db.session import engine
+    from app.mock.seed import seed_mock
+    from app.models.station import Station
+    from sqlmodel import Session, select
 
     init_db()
+    with Session(engine) as session:
+        has_station = session.exec(select(Station).limit(1)).first() is not None
+    if not has_station:
+        seed_mock()
     yield
 
 

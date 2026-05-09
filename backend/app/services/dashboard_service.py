@@ -76,7 +76,11 @@ def _get_active_source_filter(session: Session) -> str | None:
     ).first()
     if latest:
         _, source = latest
-        return source.code
+        station_count = session.exec(
+            select(func.count(Station.id)).where(Station.source_system == source.code)
+        ).one()
+        if station_count:
+            return source.code
     return None
 
 
